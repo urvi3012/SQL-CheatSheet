@@ -82,3 +82,14 @@ code {
   color: white;
   cursor: pointer;
 }
+
+.card {
+  padding: 20px;
+  line-height: 1.6;
+  border-left: 4px solid #3b82f6;
+}
+
+.title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
