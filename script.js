@@ -1,414 +1,170 @@
+const container = document.getElementById("container");
+
 const data = [
-
 {
-title: "WINDOW FRAME (ROWS vs RANGE)",
-category: "Window",
-content: `
-Concept:
-Defines which rows are included in a window calculation.
+title: "ROLLING COUNT",
 
-Two types:
-1. ROWS → based on physical row count
-2. RANGE → based on value (time/numeric)
+concept: "Counts rows in sliding window",
 
----
+syntax: `
+COUNT(*) OVER (
+ ORDER BY date
+ ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+)
+`,
 
-Input:
+input: `
 date        value
 2020-05-01  10
 2020-05-02  20
 2020-05-03  30
 2020-05-10  40
+`,
 
----
-
-ROWS Example:
-SUM(value) OVER (
-  ORDER BY date
-  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+query: `
+SELECT date,
+COUNT(*) OVER (
+ ORDER BY date
+ ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
+FROM t
+`,
 
-Output:
-date        sum
-2020-05-01  10
-2020-05-02  30
-2020-05-03  60
-2020-05-10  90   ← still includes 2 previous rows
+output: `
+1
+2
+3
+3
+`,
 
----
+explanation: `
+Always takes current + 2 previous rows.
+Ignores date gaps.
+`,
 
-RANGE Example:
-SUM(value) OVER (
-  ORDER BY date
-  RANGE BETWEEN INTERVAL '2 days' PRECEDING AND CURRENT ROW
-)
-
-Output:
-date        sum
-2020-05-01  10
-2020-05-02  30
-2020-05-03  60
-2020-05-10  40   ← gap removes older rows
-
----
-
-When to use:
-ROWS → fixed number of rows
-RANGE → real time-based windows
+when: `
+Use for recent activity by row count
 `
 },
 
 {
 title: "PRECEDING / FOLLOWING",
-category: "Window",
-content: `
-Concept:
-Defines direction of window relative to current row
 
----
+concept: "Controls window direction",
 
-Input:
-date        value
-2020-05-01  10
-2020-05-02  20
-2020-05-03  30
-2020-05-04  40
-
----
-
-1. PRECEDING (past)
-
+syntax: `
 ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
-
-Output:
-10
-30
-50
-70
-
-Meaning:
-current + previous row
-
----
-
-2. FOLLOWING (future)
-
 ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING
+`,
 
-Output:
+input: `
+10,20,30,40
+`,
+
+query: `
+SUM(value) OVER (
+ ORDER BY value
+ ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+)
+`,
+
+output: `
+10
 30
 50
 70
-40
+`,
 
-Meaning:
-current + next row
+explanation: `
+PRECEDING = previous rows
+FOLLOWING = next rows
+`,
 
----
-
-3. BOTH SIDES
-
-ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
-
-Output:
-30
-60
-90
-70
-
-Meaning:
-previous + current + next
-
----
-
-When to use:
-PRECEDING → history
-FOLLOWING → forecasting / forward window
+when: `
+Use for forward/backward analysis
 `
 },
 
 {
-title: "ROLLING COUNT vs ROW_NUMBER",
-category: "Window",
-content: `
-Concept difference:
+title: "TO_CHAR",
 
-ROW_NUMBER:
-- gives position
-- keeps increasing
+concept: "Format timestamps",
 
-ROLLING COUNT:
-- counts rows in window
-- resets based on window
+syntax: `
+TO_CHAR(ts, 'YYYY-MM-DD')
+`,
 
----
-
-Input:
-date
-2020-05-01
-2020-05-02
-2020-05-03
-2020-05-10
-
----
-
-ROW_NUMBER:
-1,2,3,4
-
----
-
-ROLLING COUNT (last 2 rows):
-1
-2
-3
-3
-
----
-
-Key:
-ROW_NUMBER = position
-ROLLING COUNT = recent activity
-
----
-
-When to use:
-ROW_NUMBER → ranking
-ROLLING COUNT → density/frequency
-`
-},
-
-{
-title: "WINDOW WITH CONDITION",
-category: "Window",
-content: `
-Concept:
-Apply condition inside window aggregation
-
----
-
-Input:
-date        type    value
-2020-05-01  order   10
-2020-05-02  visit   5
-2020-05-03  order   20
-
----
-
-Query:
-SUM(CASE WHEN type='order' THEN value END)
-OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
-
----
-
-Output:
-10
-10
-30
-
----
-
-Key:
-Window = all rows
-Aggregation = only filtered rows
-
----
-
-When to use:
-filtered trends
-`
-},
-
-{
-title: "NTILE vs PERCENTILE",
-category: "Window",
-content: `
-Concept difference:
-
-NTILE:
-- splits rows evenly
-
-PERCENTILE_CONT:
-- gives value threshold
-
----
-
-Input:
-10,20,30,40,50
-
----
-
-NTILE(5):
-1,2,3,4,5
-
----
-
-PERCENTILE_CONT(0.2):
-~18
-
----
-
-Key:
-NTILE → bucket
-PERCENTILE → cutoff value
-
----
-
-When to use:
-NTILE → top/bottom %
-PERCENTILE → threshold filtering
-`
-},
-
-{
-title: "LAG / LEAD (with default)",
-category: "Window",
-content: `
-Concept:
-Access previous or next row
-
----
-
-Syntax:
-LAG(col, 1, default)
-LEAD(col, 1, default)
-
----
-
-Input:
-value
-10
-20
-30
-
----
-
-Output:
-value prev next
-10    0    20
-20    10   30
-30    20   0
-
----
-
-When to use:
-time comparison, diff calculation
-`
-},
-
-{
-title: "DATE FORMATTING (TO_CHAR)",
-category: "Date",
-content: `
-Concept:
-Convert timestamp to readable format
-
----
-
-Input:
+input: `
 2020-05-01 14:35:20
+`,
 
----
+query: `
+SELECT TO_CHAR(ts, 'DD Mon YYYY')
+`,
 
-Formats:
+output: `
+01 May 2020
+`,
 
-YYYY → 2020
-MM → 05
-Mon → May
-DD → 01
-Day → Friday
-HH24 → 14
-HH12 → 02
-MI → 35
-SS → 20
+explanation: `
+Formatting converts timestamp to readable string
+`,
 
----
-
-Examples:
-
-TO_CHAR(ts,'YYYY-MM-DD')
-→ 2020-05-01
-
-TO_CHAR(ts,'Mon YYYY')
-→ May 2020
-
-TO_CHAR(ts,'Day, DD Mon YYYY')
-→ Friday, 01 May 2020
-
----
-
-When to use:
-reporting / dashboards
+when: `
+Use in reporting
 `
 },
 
 {
 title: "EPOCH",
-category: "Date",
-content: `
-Concept:
-Convert time difference to seconds
 
----
+concept: "Convert time to seconds",
 
-Example:
+syntax: `
+EXTRACT(EPOCH FROM ts)
+`,
+
+input: `
 2020-05-02 - 2020-05-01
+`,
 
-Query:
-EXTRACT(EPOCH FROM (t2 - t1))
+query: `
+SELECT EXTRACT(EPOCH FROM diff)
+`,
 
-Output:
+output: `
 86400
+`,
 
----
+explanation: `
+1 day = 86400 seconds
+`,
 
-When to use:
-time difference calculations
-`
-},
-
-{
-title: "ARRAY_AGG",
-category: "Functions",
-content: `
-Concept:
-Group values into array
-
----
-
-Example:
-user_id orders
-1       [101,102,103]
-
----
-
-When to use:
-list aggregation
-`
-},
-
-{
-title: "PIVOT (CASE WHEN)",
-category: "Aggregation",
-content: `
-Concept:
-Convert rows → columns
-
----
-
-Query:
-SUM(CASE WHEN risk='Low' THEN 1 END)
-
----
-
-Output:
-type   low high total
-A      10  5    15
-
----
-
-When to use:
-reporting, dashboards
+when: `
+Use for time differences
 `
 }
-
 ];
+
+function render() {
+  data.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h2>${item.title}</h2>
+
+      <b>Concept:</b><pre>${item.concept}</pre>
+      <b>Syntax:</b><pre>${item.syntax}</pre>
+      <b>Input:</b><pre>${item.input}</pre>
+      <b>Query:</b><pre>${item.query}</pre>
+      <b>Output:</b><pre>${item.output}</pre>
+      <b>Explanation:</b><pre>${item.explanation}</pre>
+      <b>When to use:</b><pre>${item.when}</pre>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+render();
