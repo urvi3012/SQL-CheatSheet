@@ -1,18 +1,50 @@
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background: #f8f9fa;
+  background: #f5f7fb;
+  color: #111;
+  transition: all 0.3s ease;
 }
 
-h1 {
-  text-align: center;
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#toggleTheme {
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
 #search {
   width: 100%;
   padding: 10px;
-  margin-bottom: 20px;
+  margin: 15px 0;
   font-size: 16px;
+}
+
+#filters {
+  margin-bottom: 15px;
+}
+
+.filter-btn {
+  padding: 6px 10px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #ddd;
+}
+
+.filter-btn.active {
+  background: #007bff;
+  color: white;
 }
 
 .card {
@@ -21,6 +53,10 @@ h1 {
   padding: 15px;
   margin-bottom: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+body.dark .card {
+  background: #1e1e1e;
 }
 
 .title {
@@ -35,7 +71,19 @@ h1 {
 
 code {
   background: #eee;
-  padding: 5px;
+  padding: 10px;
   display: block;
   white-space: pre-wrap;
+  border-radius: 6px;
+}
+
+body.dark code {
+  background: #2a2a2a;
+}
+
+.copy-btn {
+  margin-top: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
 }
