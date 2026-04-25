@@ -1,26 +1,42 @@
 <!DOCTYPE html>
-
-<html lang="en">
+<html>
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SQL Cheat Sheet</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    pre {
+      background: #020617;
+      padding: 10px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="topbar">
-  <h1>SQL Cheat Sheet</h1>
-  <button id="toggleTheme">🌙</button>
-</div>
-
-<input type="text" id="search" placeholder="Search concepts, syntax..." />
-
-<div id="filters"></div>
+<h1>SQL Cheat Sheet</h1>
 
 <div id="container"></div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
