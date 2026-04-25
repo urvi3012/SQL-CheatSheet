@@ -1,428 +1,229 @@
 const data = [
 
-{
-title: "SELECT",
-content: `
+{ title: "SELECT", category: "Basics", content: `
 Concept: retrieve data
 Syntax:
 SELECT col1, col2 FROM table
+`},
 
-Expected Output:
-subset of columns/rows
-
-When to use:
-every query
-`
-},
-
-{
-title: "WHERE",
-content: `
+{ title: "WHERE", category: "Basics", content: `
 Concept: filter rows
 Syntax:
 SELECT * FROM table WHERE condition
+`},
 
-Expected Output:
-filtered rows
-
-When to use:
-apply conditions before aggregation
-`
-},
-
-{
-title: "GROUP BY",
-content: `
+{ title: "GROUP BY", category: "Aggregation", content: `
 Concept: aggregate per group
 Syntax:
 SELECT col, SUM(x) FROM table GROUP BY col
+`},
 
-Expected Output:
-one row per group
-
-When to use:
-metrics per entity
-`
-},
-
-{
-title: "HAVING",
-content: `
+{ title: "HAVING", category: "Aggregation", content: `
 Concept: filter aggregated data
 Syntax:
 GROUP BY col HAVING SUM(x) > 100
+`},
 
-Expected Output:
-filtered groups
-
-When to use:
-post aggregation filtering
-`
-},
-
-{
-title: "CASE WHEN",
-content: `
+{ title: "CASE WHEN", category: "Aggregation", content: `
 Concept: conditional logic
 Syntax:
 CASE WHEN cond THEN val ELSE val END
+`},
 
-Expected Output:
-derived column
-
-When to use:
-classification, flags
-`
-},
-
-{
-title: "JOINS",
-content: `
+{ title: "JOINS", category: "Joins", content: `
 INNER JOIN:
 FROM t1 JOIN t2 ON t1.id = t2.id
 
 LEFT JOIN:
 FROM t1 LEFT JOIN t2 ON ...
+`},
 
-Expected Output:
-combined tables
-
-When to use:
-merge datasets
-`
-},
-
-{
-title: "CROSS JOIN",
-content: `
+{ title: "CROSS JOIN", category: "Joins", content: `
 Concept: attach single-row result
 Syntax:
 FROM t1 CROSS JOIN t2
+`},
 
-Expected Output:
-all combinations
-
-When to use:
-attach threshold or constants
-`
-},
-
-{
-title: "CTE",
-content: `
+{ title: "CTE", category: "Basics", content: `
 Concept: modular query
 Syntax:
 WITH cte AS (SELECT ...) SELECT * FROM cte
+`},
 
-Expected Output:
-intermediate reusable table
-
-When to use:
-multi-step queries
-`
-},
-
-{
-title: "ROW_NUMBER",
-content: `
-Concept: row position
-
-Syntax:
+{ title: "ROW_NUMBER", category: "Window", content: `
 ROW_NUMBER() OVER (ORDER BY col)
 
 Example:
-date        row_number
-2020-05-01  1
-2020-05-02  2
-2020-05-10  3
+2020-05-01 → 1
+2020-05-02 → 2
+`},
 
-When to use:
-deduplication, ranking
-`
-},
-
-{
-title: "LAG / LEAD",
-content: `
-Concept: previous / next row
-
-Syntax:
+{ title: "LAG / LEAD", category: "Window", content: `
 LAG(col, 1, 0) OVER (ORDER BY date)
 LEAD(col, 1, 0) OVER (ORDER BY date)
+`},
 
-Example:
-date        value prev next
-2020-05-01  10    0    20
-2020-05-02  20    10   30
-2020-05-03  30    20   0
-
-When to use:
-comparisons, deltas
-`
-},
-
-{
-title: "ROLLING COUNT (ROWS)",
-content: `
-Concept: count rows in recent window
-
-Syntax:
+{ title: "ROLLING COUNT", category: "Window", content: `
 COUNT(*) OVER (
   ORDER BY date
   ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
 
-Example:
-date        rolling_count
-2020-05-01  1
-2020-05-02  2
-2020-05-03  3
-2020-05-10  3
-2020-05-11  3
+Key:
+ROWS = fixed row window
+`},
 
-Key Point:
-ROWS = fixed row window, ignores time gaps
-
-When to use:
-activity density
-`
-},
-
-{
-title: "ROLLING SUM / AVG",
-content: `
-Concept: rolling metric
-
-Syntax:
+{ title: "ROLLING SUM / AVG", category: "Window", content: `
 SUM(x) OVER (
   ORDER BY date
   ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
+`},
 
-Expected Output:
-sum of last rows
-
-When to use:
-trend analysis
-`
-},
-
-{
-title: "RANGE WINDOW (TIME BASED)",
-content: `
-Concept: time-based window
-
-Syntax:
+{ title: "RANGE WINDOW", category: "Window", content: `
 SUM(x) OVER (
   ORDER BY date
   RANGE BETWEEN INTERVAL '2 days' PRECEDING AND CURRENT ROW
 )
 
-Expected Output:
-values in time range
+Key:
+RANGE = time-based window
+`},
 
-Key Point:
-RANGE respects time gaps
-
-When to use:
-irregular timestamps
-`
-},
-
-{
-title: "WINDOW WITH CONDITION (EVENT BASED)",
-content: `
-Concept: conditional rolling metric
-
-Syntax:
+{ title: "WINDOW WITH CONDITION", category: "Window", content: `
 SUM(CASE WHEN cond THEN x END)
 OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+`},
 
-Example:
-date        type   value rolling_order_sum
-2020-05-01  order  10    10
-2020-05-02  visit  5     10
-2020-05-03  order  20    30
-2020-05-04  visit  7     20
-2020-05-05  order  15    35
-
-Key Point:
-window = all rows
-aggregation = conditional
-
-When to use:
-filtered trends
-`
-},
-
-{
-title: "NTILE",
-content: `
-Concept: equal buckets
-
-Syntax:
+{ title: "NTILE", category: "Window", content: `
 NTILE(50) OVER (ORDER BY col)
+`},
 
-Example:
-value bucket
-10    1
-20    2
-30    3
-40    4
-50    5
-
-When to use:
-top/bottom % rows
-`
-},
-
-{
-title: "PERCENTILE_CONT",
-content: `
-Concept: value threshold
-
-Syntax:
+{ title: "PERCENTILE_CONT", category: "Window", content: `
 PERCENTILE_CONT(0.2)
 WITHIN GROUP (ORDER BY col)
+`},
 
-Example:
-values: 10,20,30,40,50
-p20 ≈ 18
-
-When to use:
-cutoff filtering
-
-Difference:
-NTILE → splits rows
-PERCENTILE → gives value
-`
-},
-
-{
-title: "ARRAY",
-content: `
-Concept: store multiple values
-
-Syntax:
+{ title: "ARRAY_AGG", category: "Functions", content: `
 ARRAY_AGG(col)
 
 Example:
-user_id orders
-1       [101,102,103]
+[101,102,103]
+`},
 
-When to use:
-group into lists
-`
-},
-
-{
-title: "CONCAT",
-content: `
-Concept: combine strings
-
-Syntax:
+{ title: "CONCAT", category: "Functions", content: `
 CONCAT(col1, col2)
 or col1 || col2
+`},
 
-Example:
-John + Doe → John Doe
-
-When to use:
-format output
-`
-},
-
-{
-title: "DATE FORMAT (TO_CHAR)",
-content: `
-Concept: format timestamp
-
-Syntax:
+{ title: "TO_CHAR (DATE FORMAT)", category: "Date", content: `
 TO_CHAR(ts, 'YYYY-MM-DD')
+`},
 
-Example:
-May 2020
-
-When to use:
-reporting
-`
-},
-
-{
-title: "EPOCH",
-content: `
-Concept: seconds since 1970
-
-Syntax:
+{ title: "EPOCH", category: "Date", content: `
 EXTRACT(EPOCH FROM ts)
+`},
 
-Example:
-1 day → 86400
+{ title: "PIVOT (CASE)", category: "Aggregation", content: `
+SUM(CASE WHEN risk_category = 'Low Risk' THEN 1 ELSE 0 END)
+`},
 
-When to use:
-time difference
-`
-},
-
-{
-title: "PIVOT (CASE WHEN)",
-content: `
-Concept: convert rows to columns
-
-Syntax:
+{ title: "CONDITIONAL AGGREGATION", category: "Aggregation", content: `
 SUM(CASE WHEN cond THEN 1 ELSE 0 END)
+`},
 
-Example:
-inspection_type  no low medium high total
-Routine          10 20  15     5    50
-
-When to use:
-category breakdown
-`
-},
-
-{
-title: "CONDITIONAL AGGREGATION",
-content: `
-Concept: filtered counts
-
-Syntax:
-SUM(CASE WHEN cond THEN 1 ELSE 0 END)
-
-Expected Output:
-count per condition
-
-When to use:
-ratios, KPIs
-`
-},
-
-{
-title: "RATIO",
-content: `
-Concept: percentage
-
-Syntax:
+{ title: "RATIO", category: "Aggregation", content: `
 SUM(flag)*1.0 / COUNT(*)
+`},
 
-Expected Output:
-decimal
-
-When to use:
-metrics
-`
-},
-
-{
-title: "CORE DIFFERENCES",
-content: `
-ROWS → fixed row window
-RANGE → time-based window
-NTILE → equal row buckets
-PERCENTILE → threshold value
+{ title: "CORE DIFFERENCES", category: "Concepts", content: `
+ROWS → fixed rows
+RANGE → time-based
+NTILE → buckets
+PERCENTILE → threshold
 ROW_NUMBER → position
 ROLLING COUNT → recent activity
-`
+`}
+];
+
+const container = document.getElementById("container");
+const search = document.getElementById("search");
+const filtersDiv = document.getElementById("filters");
+const toggleTheme = document.getElementById("toggleTheme");
+
+let activeCategory = "All";
+
+const categories = ["All", ...new Set(data.map(d => d.category))];
+
+categories.forEach(cat => {
+  const btn = document.createElement("button");
+  btn.textContent = cat;
+  btn.className = "filter-btn";
+  if (cat === "All") btn.classList.add("active");
+
+  btn.onclick = () => {
+    activeCategory = cat;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  };
+
+  filtersDiv.appendChild(btn);
+});
+
+function render() {
+  const val = search.value.toLowerCase();
+
+  const filtered = data.filter(d =>
+    (activeCategory === "All" || d.category === activeCategory) &&
+    (d.title.toLowerCase().includes(val) ||
+     d.content.toLowerCase().includes(val))
+  );
+
+  container.innerHTML = "";
+
+  filtered.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = `${item.title} (${item.category})`;
+
+    const content = document.createElement("div");
+    content.className = "content";
+
+    const code = document.createElement("code");
+    code.textContent = item.content;
+
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy";
+    copyBtn.className = "copy-btn";
+
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(item.content);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => copyBtn.textContent = "Copy", 1000);
+    };
+
+    content.appendChild(code);
+    content.appendChild(copyBtn);
+
+    title.onclick = () => {
+      content.style.display =
+        content.style.display === "block" ? "none" : "block";
+    };
+
+    card.appendChild(title);
+    card.appendChild(content);
+    container.appendChild(card);
+  });
 }
 
-];
+search.addEventListener("input", render);
+
+toggleTheme.onclick = () => {
+  document.body.classList.toggle("dark");
+};
+
+render();
