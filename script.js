@@ -52,10 +52,6 @@ WITH cte AS (SELECT ...) SELECT * FROM cte
 
 { title: "ROW_NUMBER", category: "Window", content: `
 ROW_NUMBER() OVER (ORDER BY col)
-
-Example:
-2020-05-01 → 1
-2020-05-02 → 2
 `},
 
 { title: "LAG / LEAD", category: "Window", content: `
@@ -68,9 +64,6 @@ COUNT(*) OVER (
   ORDER BY date
   ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
-
-Key:
-ROWS = fixed row window
 `},
 
 { title: "ROLLING SUM / AVG", category: "Window", content: `
@@ -85,14 +78,40 @@ SUM(x) OVER (
   ORDER BY date
   RANGE BETWEEN INTERVAL '2 days' PRECEDING AND CURRENT ROW
 )
-
-Key:
-RANGE = time-based window
 `},
 
 { title: "WINDOW WITH CONDITION", category: "Window", content: `
 SUM(CASE WHEN cond THEN x END)
 OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+`},
+
+{ title: "WINDOW FRAME (PRECEDING / FOLLOWING)", category: "Window", content: `
+Concept:
+Define window boundaries
+
+Input:
+2020-05-01 10
+2020-05-02 20
+2020-05-03 30
+2020-05-04 40
+
+ROWS BETWEEN 1 PRECEDING AND CURRENT ROW:
+10
+30
+50
+70
+
+ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING:
+30
+50
+70
+40
+
+ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING:
+30
+60
+90
+70
 `},
 
 { title: "NTILE", category: "Window", content: `
@@ -117,11 +136,28 @@ or col1 || col2
 `},
 
 { title: "TO_CHAR (DATE FORMAT)", category: "Date", content: `
-TO_CHAR(ts, 'YYYY-MM-DD')
+Input:
+2020-05-01 14:35:20
+
+YYYY → 2020
+MM → 05
+Mon → May
+DD → 01
+HH24 → 14
+MI → 35
+
+Examples:
+2020-05-01
+May 2020
+01 May, 2020
+14:35:20
 `},
 
 { title: "EPOCH", category: "Date", content: `
 EXTRACT(EPOCH FROM ts)
+
+Example:
+1 day = 86400
 `},
 
 { title: "PIVOT (CASE)", category: "Aggregation", content: `
@@ -149,7 +185,6 @@ ROLLING COUNT → recent activity
 const container = document.getElementById("container");
 const search = document.getElementById("search");
 const filtersDiv = document.getElementById("filters");
-const toggleTheme = document.getElementById("toggleTheme");
 
 let activeCategory = "All";
 
@@ -221,9 +256,5 @@ function render() {
 }
 
 search.addEventListener("input", render);
-
-toggleTheme.onclick = () => {
-  document.body.classList.toggle("dark");
-};
 
 render();
