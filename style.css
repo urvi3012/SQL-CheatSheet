@@ -1,32 +1,25 @@
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f5f7fb;
-  color: #111;
-  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #0f172a;
+  color: #e2e8f0;
 }
 
-body.dark {
-  background: #121212;
-  color: #eee;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#toggleTheme {
-  padding: 8px 12px;
-  cursor: pointer;
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
 }
 
 #search {
   width: 100%;
-  padding: 10px;
-  margin: 15px 0;
-  font-size: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 15px;
+  background: #1e293b;
+  color: white;
 }
 
 #filters {
@@ -34,33 +27,35 @@ body.dark {
 }
 
 .filter-btn {
-  padding: 6px 10px;
-  margin-right: 5px;
+  background: #1e293b;
+  color: #cbd5f5;
   border: none;
-  border-radius: 6px;
+  padding: 8px 12px;
+  margin-right: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  background: #ddd;
 }
 
 .filter-btn.active {
-  background: #007bff;
+  background: #3b82f6;
   color: white;
 }
 
 .card {
-  background: white;
-  border-radius: 10px;
+  background: #1e293b;
+  border-radius: 12px;
   padding: 15px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
 }
 
-body.dark .card {
-  background: #1e1e1e;
+.card:hover {
+  transform: scale(1.01);
 }
 
 .title {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
 }
 
@@ -70,20 +65,20 @@ body.dark .card {
 }
 
 code {
-  background: #eee;
-  padding: 10px;
+  background: #020617;
+  padding: 12px;
+  border-radius: 8px;
   display: block;
   white-space: pre-wrap;
-  border-radius: 6px;
-}
-
-body.dark code {
-  background: #2a2a2a;
+  font-size: 13px;
 }
 
 .copy-btn {
-  margin-top: 5px;
-  padding: 5px 10px;
-  font-size: 12px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  color: white;
   cursor: pointer;
 }
