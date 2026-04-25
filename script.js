@@ -1,260 +1,414 @@
 const data = [
 
-{ title: "SELECT", category: "Basics", content: `
-Concept: retrieve data
-Syntax:
-SELECT col1, col2 FROM table
-`},
+{
+title: "WINDOW FRAME (ROWS vs RANGE)",
+category: "Window",
+content: `
+Concept:
+Defines which rows are included in a window calculation.
 
-{ title: "WHERE", category: "Basics", content: `
-Concept: filter rows
-Syntax:
-SELECT * FROM table WHERE condition
-`},
+Two types:
+1. ROWS → based on physical row count
+2. RANGE → based on value (time/numeric)
 
-{ title: "GROUP BY", category: "Aggregation", content: `
-Concept: aggregate per group
-Syntax:
-SELECT col, SUM(x) FROM table GROUP BY col
-`},
+---
 
-{ title: "HAVING", category: "Aggregation", content: `
-Concept: filter aggregated data
-Syntax:
-GROUP BY col HAVING SUM(x) > 100
-`},
+Input:
+date        value
+2020-05-01  10
+2020-05-02  20
+2020-05-03  30
+2020-05-10  40
 
-{ title: "CASE WHEN", category: "Aggregation", content: `
-Concept: conditional logic
-Syntax:
-CASE WHEN cond THEN val ELSE val END
-`},
+---
 
-{ title: "JOINS", category: "Joins", content: `
-INNER JOIN:
-FROM t1 JOIN t2 ON t1.id = t2.id
-
-LEFT JOIN:
-FROM t1 LEFT JOIN t2 ON ...
-`},
-
-{ title: "CROSS JOIN", category: "Joins", content: `
-Concept: attach single-row result
-Syntax:
-FROM t1 CROSS JOIN t2
-`},
-
-{ title: "CTE", category: "Basics", content: `
-Concept: modular query
-Syntax:
-WITH cte AS (SELECT ...) SELECT * FROM cte
-`},
-
-{ title: "ROW_NUMBER", category: "Window", content: `
-ROW_NUMBER() OVER (ORDER BY col)
-`},
-
-{ title: "LAG / LEAD", category: "Window", content: `
-LAG(col, 1, 0) OVER (ORDER BY date)
-LEAD(col, 1, 0) OVER (ORDER BY date)
-`},
-
-{ title: "ROLLING COUNT", category: "Window", content: `
-COUNT(*) OVER (
+ROWS Example:
+SUM(value) OVER (
   ORDER BY date
   ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
-`},
 
-{ title: "ROLLING SUM / AVG", category: "Window", content: `
-SUM(x) OVER (
-  ORDER BY date
-  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-)
-`},
+Output:
+date        sum
+2020-05-01  10
+2020-05-02  30
+2020-05-03  60
+2020-05-10  90   ← still includes 2 previous rows
 
-{ title: "RANGE WINDOW", category: "Window", content: `
-SUM(x) OVER (
+---
+
+RANGE Example:
+SUM(value) OVER (
   ORDER BY date
   RANGE BETWEEN INTERVAL '2 days' PRECEDING AND CURRENT ROW
 )
-`},
 
-{ title: "WINDOW WITH CONDITION", category: "Window", content: `
-SUM(CASE WHEN cond THEN x END)
-OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
-`},
+Output:
+date        sum
+2020-05-01  10
+2020-05-02  30
+2020-05-03  60
+2020-05-10  40   ← gap removes older rows
 
-{ title: "WINDOW FRAME (PRECEDING / FOLLOWING)", category: "Window", content: `
+---
+
+When to use:
+ROWS → fixed number of rows
+RANGE → real time-based windows
+`
+},
+
+{
+title: "PRECEDING / FOLLOWING",
+category: "Window",
+content: `
 Concept:
-Define window boundaries
+Defines direction of window relative to current row
+
+---
 
 Input:
-2020-05-01 10
-2020-05-02 20
-2020-05-03 30
-2020-05-04 40
+date        value
+2020-05-01  10
+2020-05-02  20
+2020-05-03  30
+2020-05-04  40
 
-ROWS BETWEEN 1 PRECEDING AND CURRENT ROW:
+---
+
+1. PRECEDING (past)
+
+ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+
+Output:
 10
 30
 50
 70
 
-ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING:
+Meaning:
+current + previous row
+
+---
+
+2. FOLLOWING (future)
+
+ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING
+
+Output:
 30
 50
 70
 40
 
-ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING:
+Meaning:
+current + next row
+
+---
+
+3. BOTH SIDES
+
+ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+
+Output:
 30
 60
 90
 70
-`},
 
-{ title: "NTILE", category: "Window", content: `
-NTILE(50) OVER (ORDER BY col)
-`},
+Meaning:
+previous + current + next
 
-{ title: "PERCENTILE_CONT", category: "Window", content: `
-PERCENTILE_CONT(0.2)
-WITHIN GROUP (ORDER BY col)
-`},
+---
 
-{ title: "ARRAY_AGG", category: "Functions", content: `
-ARRAY_AGG(col)
+When to use:
+PRECEDING → history
+FOLLOWING → forecasting / forward window
+`
+},
 
-Example:
-[101,102,103]
-`},
+{
+title: "ROLLING COUNT vs ROW_NUMBER",
+category: "Window",
+content: `
+Concept difference:
 
-{ title: "CONCAT", category: "Functions", content: `
-CONCAT(col1, col2)
-or col1 || col2
-`},
+ROW_NUMBER:
+- gives position
+- keeps increasing
 
-{ title: "TO_CHAR (DATE FORMAT)", category: "Date", content: `
+ROLLING COUNT:
+- counts rows in window
+- resets based on window
+
+---
+
+Input:
+date
+2020-05-01
+2020-05-02
+2020-05-03
+2020-05-10
+
+---
+
+ROW_NUMBER:
+1,2,3,4
+
+---
+
+ROLLING COUNT (last 2 rows):
+1
+2
+3
+3
+
+---
+
+Key:
+ROW_NUMBER = position
+ROLLING COUNT = recent activity
+
+---
+
+When to use:
+ROW_NUMBER → ranking
+ROLLING COUNT → density/frequency
+`
+},
+
+{
+title: "WINDOW WITH CONDITION",
+category: "Window",
+content: `
+Concept:
+Apply condition inside window aggregation
+
+---
+
+Input:
+date        type    value
+2020-05-01  order   10
+2020-05-02  visit   5
+2020-05-03  order   20
+
+---
+
+Query:
+SUM(CASE WHEN type='order' THEN value END)
+OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+
+---
+
+Output:
+10
+10
+30
+
+---
+
+Key:
+Window = all rows
+Aggregation = only filtered rows
+
+---
+
+When to use:
+filtered trends
+`
+},
+
+{
+title: "NTILE vs PERCENTILE",
+category: "Window",
+content: `
+Concept difference:
+
+NTILE:
+- splits rows evenly
+
+PERCENTILE_CONT:
+- gives value threshold
+
+---
+
+Input:
+10,20,30,40,50
+
+---
+
+NTILE(5):
+1,2,3,4,5
+
+---
+
+PERCENTILE_CONT(0.2):
+~18
+
+---
+
+Key:
+NTILE → bucket
+PERCENTILE → cutoff value
+
+---
+
+When to use:
+NTILE → top/bottom %
+PERCENTILE → threshold filtering
+`
+},
+
+{
+title: "LAG / LEAD (with default)",
+category: "Window",
+content: `
+Concept:
+Access previous or next row
+
+---
+
+Syntax:
+LAG(col, 1, default)
+LEAD(col, 1, default)
+
+---
+
+Input:
+value
+10
+20
+30
+
+---
+
+Output:
+value prev next
+10    0    20
+20    10   30
+30    20   0
+
+---
+
+When to use:
+time comparison, diff calculation
+`
+},
+
+{
+title: "DATE FORMATTING (TO_CHAR)",
+category: "Date",
+content: `
+Concept:
+Convert timestamp to readable format
+
+---
+
 Input:
 2020-05-01 14:35:20
+
+---
+
+Formats:
 
 YYYY → 2020
 MM → 05
 Mon → May
 DD → 01
+Day → Friday
 HH24 → 14
+HH12 → 02
 MI → 35
+SS → 20
+
+---
 
 Examples:
-2020-05-01
-May 2020
-01 May, 2020
-14:35:20
-`},
 
-{ title: "EPOCH", category: "Date", content: `
-EXTRACT(EPOCH FROM ts)
+TO_CHAR(ts,'YYYY-MM-DD')
+→ 2020-05-01
+
+TO_CHAR(ts,'Mon YYYY')
+→ May 2020
+
+TO_CHAR(ts,'Day, DD Mon YYYY')
+→ Friday, 01 May 2020
+
+---
+
+When to use:
+reporting / dashboards
+`
+},
+
+{
+title: "EPOCH",
+category: "Date",
+content: `
+Concept:
+Convert time difference to seconds
+
+---
 
 Example:
-1 day = 86400
-`},
+2020-05-02 - 2020-05-01
 
-{ title: "PIVOT (CASE)", category: "Aggregation", content: `
-SUM(CASE WHEN risk_category = 'Low Risk' THEN 1 ELSE 0 END)
-`},
+Query:
+EXTRACT(EPOCH FROM (t2 - t1))
 
-{ title: "CONDITIONAL AGGREGATION", category: "Aggregation", content: `
-SUM(CASE WHEN cond THEN 1 ELSE 0 END)
-`},
+Output:
+86400
 
-{ title: "RATIO", category: "Aggregation", content: `
-SUM(flag)*1.0 / COUNT(*)
-`},
+---
 
-{ title: "CORE DIFFERENCES", category: "Concepts", content: `
-ROWS → fixed rows
-RANGE → time-based
-NTILE → buckets
-PERCENTILE → threshold
-ROW_NUMBER → position
-ROLLING COUNT → recent activity
-`}
-];
+When to use:
+time difference calculations
+`
+},
 
-const container = document.getElementById("container");
-const search = document.getElementById("search");
-const filtersDiv = document.getElementById("filters");
+{
+title: "ARRAY_AGG",
+category: "Functions",
+content: `
+Concept:
+Group values into array
 
-let activeCategory = "All";
+---
 
-const categories = ["All", ...new Set(data.map(d => d.category))];
+Example:
+user_id orders
+1       [101,102,103]
 
-categories.forEach(cat => {
-  const btn = document.createElement("button");
-  btn.textContent = cat;
-  btn.className = "filter-btn";
-  if (cat === "All") btn.classList.add("active");
+---
 
-  btn.onclick = () => {
-    activeCategory = cat;
-    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    render();
-  };
+When to use:
+list aggregation
+`
+},
 
-  filtersDiv.appendChild(btn);
-});
+{
+title: "PIVOT (CASE WHEN)",
+category: "Aggregation",
+content: `
+Concept:
+Convert rows → columns
 
-function render() {
-  const val = search.value.toLowerCase();
+---
 
-  const filtered = data.filter(d =>
-    (activeCategory === "All" || d.category === activeCategory) &&
-    (d.title.toLowerCase().includes(val) ||
-     d.content.toLowerCase().includes(val))
-  );
+Query:
+SUM(CASE WHEN risk='Low' THEN 1 END)
 
-  container.innerHTML = "";
+---
 
-  filtered.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "card";
+Output:
+type   low high total
+A      10  5    15
 
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = `${item.title} (${item.category})`;
+---
 
-    const content = document.createElement("div");
-    content.className = "content";
-
-    const code = document.createElement("code");
-    code.textContent = item.content;
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copy";
-    copyBtn.className = "copy-btn";
-
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(item.content);
-      copyBtn.textContent = "Copied!";
-      setTimeout(() => copyBtn.textContent = "Copy", 1000);
-    };
-
-    content.appendChild(code);
-    content.appendChild(copyBtn);
-
-    title.onclick = () => {
-      content.style.display =
-        content.style.display === "block" ? "none" : "block";
-    };
-
-    card.appendChild(title);
-    card.appendChild(content);
-    container.appendChild(card);
-  });
+When to use:
+reporting, dashboards
+`
 }
 
-search.addEventListener("input", render);
-
-render();
+];
