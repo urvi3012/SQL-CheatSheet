@@ -1,42 +1,1078 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>SQL Cheat Sheet</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      padding: 20px;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SQL Cheat Sheet — Data Engineer Interview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #09090b;
+  --bg2: #111113;
+  --bg3: #18181b;
+  --bg4: #202024;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e4e4e7;
+  --muted: #52525b;
+  --muted2: #71717a;
+  --accent: #38bdf8;
+  --accent2: #a78bfa;
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --coral: #f87171;
+  --teal: #2dd4bf;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.7;min-height:100vh;}
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
+/* TOP NAV — minimal */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:52px;
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:var(--display);font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.logo em{color:var(--accent);font-style:normal;}
+.search-wrap{position:relative;display:flex;align-items:center;}
+.search-icon{position:absolute;left:10px;color:var(--muted2);font-size:14px;pointer-events:none;}
+#gsearch{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;padding:6px 12px 6px 30px;
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  width:220px;outline:none;transition:border-color 0.2s,width 0.2s;
+}
+#gsearch:focus{border-color:rgba(56,189,248,0.5);width:280px;}
+#gsearch::placeholder{color:var(--muted);}
 
-    h2 {
-      margin-bottom: 10px;
-    }
+/* HERO */
+.hero{
+  padding:4rem 2.5rem 3rem;
+  max-width:780px;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1.2rem;
+  border:1px solid rgba(56,189,248,0.2);
+  background:rgba(56,189,248,0.05);
+  padding:4px 10px;border-radius:99px;
+}
+.hero h1{
+  font-family:var(--display);
+  font-size:clamp(2.2rem,5vw,3.5rem);
+  font-weight:800;line-height:1.05;letter-spacing:-0.03em;
+  margin-bottom:0.8rem;color:#fff;
+}
+.hero h1 span{color:var(--accent);}
+.hero-sub{color:var(--muted2);font-size:14px;max-width:500px;margin-bottom:2rem;}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;}
+.badge{
+  font-size:11px;padding:3px 10px;border-radius:99px;
+  border:1px solid;cursor:default;
+}
+.b-blue{background:rgba(56,189,248,0.07);border-color:rgba(56,189,248,0.2);color:var(--accent);}
+.b-purple{background:rgba(167,139,250,0.07);border-color:rgba(167,139,250,0.2);color:var(--accent2);}
+.b-green{background:rgba(74,222,128,0.07);border-color:rgba(74,222,128,0.2);color:var(--green);}
+.b-amber{background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.2);color:var(--amber);}
+.b-coral{background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.2);color:var(--coral);}
 
-    pre {
-      background: #020617;
-      padding: 10px;
-      border-radius: 6px;
-      white-space: pre-wrap;
-    }
-  </style>
+/* MAIN CONTENT */
+.content{max-width:1120px;padding:0 2.5rem 4rem;}
+
+/* SECTION SWITCHER — sits above the cards */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;gap:1rem;
+}
+.tab-bar{
+  display:flex;gap:2px;flex-wrap:wrap;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:3px;
+}
+.tb{
+  padding:6px 14px;font-size:12px;font-weight:500;
+  font-family:var(--mono);color:var(--muted2);
+  background:transparent;border:none;cursor:pointer;
+  border-radius:7px;transition:all 0.15s;white-space:nowrap;
+}
+.tb:hover{color:var(--text);background:var(--bg4);}
+.tb.active{
+  background:var(--bg);color:var(--text);
+  border:1px solid var(--border2);
+}
+.section-meta{font-size:12px;color:var(--muted);font-family:var(--mono);}
+
+/* CARD GRID */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:10px;}
+
+/* CARD */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  transition:border-color 0.15s;
+}
+.card:hover{border-color:var(--border2);}
+.card-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;cursor:pointer;user-select:none;
+  transition:background 0.1s;
+}
+.card-hd:hover{background:var(--bg3);}
+.card-left{display:flex;align-items:center;gap:9px;}
+.card-title{font-size:12.5px;font-weight:500;color:var(--text);}
+.tag{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;letter-spacing:0.03em;}
+.t-core{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.2);}
+.t-adv{background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2);}
+.t-trap{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+.t-de{background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.2);}
+.chev{color:var(--muted);font-size:10px;transition:transform 0.2s;flex-shrink:0;}
+.chev.open{transform:rotate(90deg);}
+
+.card-bd{display:none;border-top:1px solid var(--border);padding:14px 16px;}
+.card-bd.open{display:block;}
+.desc{font-size:12.5px;color:var(--muted2);margin-bottom:12px;line-height:1.7;}
+
+/* CODE AREAS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.g1{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;}
+.ex{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.ex-lbl{font-size:10px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+pre{font-family:var(--mono);font-size:11.5px;color:var(--text);line-height:1.7;white-space:pre;overflow-x:auto;}
+.kw{color:#38bdf8;}.fn{color:#a78bfa;}.str{color:#4ade80;}.num{color:#fbbf24;}.cmt{color:#3f3f46;}.out{color:#2dd4bf;}
+
+/* DIFF */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.da{background:rgba(56,189,248,0.04);border:1px solid rgba(56,189,248,0.12);border-radius:8px;padding:11px 13px;}
+.db{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.12);border-radius:8px;padding:11px 13px;}
+.dt{font-size:11px;font-weight:500;margin-bottom:7px;}
+.da .dt{color:var(--accent);}.db .dt{color:var(--amber);}
+
+/* NOTE */
+.note{
+  font-size:12px;color:var(--muted2);
+  background:var(--bg3);
+  border-left:2px solid rgba(56,189,248,0.35);
+  padding:9px 12px;border-radius:0 8px 8px 0;
+  margin-top:12px;line-height:1.65;
+}
+.note b{color:var(--text);}
+
+/* SEARCH STATE */
+#search-view{display:none;}
+#search-view.on{display:block;}
+.sr-count{font-size:12px;color:var(--muted);margin-bottom:1rem;}
+
+/* SECTION HIDDEN */
+.sec{display:none;}
+.sec.on{display:block;}
+
+/* FOOTER */
+footer{
+  text-align:center;padding:2.5rem;
+  color:var(--muted);font-size:11px;
+  border-top:1px solid var(--border);
+}
+footer a{color:var(--accent);text-decoration:none;}
+
+@media(max-width:700px){
+  nav{padding:0 1rem;}
+  .hero{padding:2.5rem 1rem 2rem;}
+  .content{padding:0 1rem 3rem;}
+  .cards{grid-template-columns:1fr;}
+  .g2,.dg{grid-template-columns:1fr;}
+  #gsearch{width:140px;}
+  .tab-bar{gap:1px;}
+  .tb{padding:5px 10px;font-size:11px;}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:fadeUp 0.25s ease both;}
+</style>
 </head>
-
 <body>
 
-<h1>SQL Cheat Sheet</h1>
+<nav>
+  <div class="logo">sql<em>.</em>ref</div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="gsearch" type="text" placeholder="Search any concept..."/>
+  </div>
+</nav>
 
-<div id="container"></div>
+<div class="hero">
+  <div class="hero-tag">Data Engineer Interview Prep</div>
+  <h1>SQL <span>Cheat Sheet</span></h1>
+  <p class="hero-sub">Every concept, syntax quirk, and trap — with real inputs, queries, and outputs side by side.</p>
+  <div class="badge-row">
+    <span class="badge b-green">Core SQL</span>
+    <span class="badge b-purple">Window functions</span>
+    <span class="badge b-blue">Sliding windows</span>
+    <span class="badge b-amber">Confused pairs</span>
+    <span class="badge b-coral">Advanced DE</span>
+  </div>
+</div>
 
-<script src="script.js"></script>
+<div class="content">
 
+<!-- search overlay -->
+<div id="search-view">
+  <p class="sr-count" id="sr-count"></p>
+  <div class="cards" id="sr-cards"></div>
+</div>
+
+<!-- TAB BAR + SECTION META — right above the cards -->
+<div class="section-header" id="sec-bar">
+  <div class="tab-bar">
+    <button class="tb active" data-s="core">Core SQL</button>
+    <button class="tb" data-s="window">Window fns</button>
+    <button class="tb" data-s="sliding">Sliding windows</button>
+    <button class="tb" data-s="confused">Confused pairs</button>
+    <button class="tb" data-s="advanced">Advanced DE</button>
+    <button class="tb" data-s="dates">Dates & times</button>
+  </div>
+  <span class="section-meta" id="sec-meta">6 concepts</span>
+</div>
+
+<!-- ═══════════════════════════ CORE SQL ═══════════════════════════ -->
+<div class="sec on" id="sec-core">
+<div class="cards">
+
+<div class="card" data-kw="where having filter aggregate group before after">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">WHERE vs HAVING — when to filter</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">WHERE filters rows <em>before</em> aggregation. HAVING filters groups <em>after</em>. Wrong choice = silent wrong results.</p>
+  <div class="dg">
+    <div class="da"><div class="dt">WHERE — row-level filter</div>
+<pre><span class="kw">SELECT</span> dept, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> salary > <span class="num">50000</span>
+<span class="kw">GROUP BY</span> dept</pre></div>
+    <div class="db"><div class="dt">HAVING — group-level filter</div>
+<pre><span class="kw">SELECT</span> dept, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">5</span></pre></div>
+  </div>
+  <div class="note"><b>Rule:</b> Filtering on an aggregate (SUM, COUNT, AVG)? → HAVING. Everything else → WHERE.</div>
+</div>
+</div>
+
+<div class="card" data-kw="join inner left cross self anti outer null">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">JOIN types — all four with when to use</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g1">
+    <div class="ex"><div class="ex-lbl">INNER JOIN — only matching rows in both</div>
+<pre><span class="kw">FROM</span> orders o <span class="kw">JOIN</span> users u <span class="kw">ON</span> o.user_id = u.id
+<span class="cmt">-- drops rows with no match on either side</span></pre></div>
+    <div class="ex"><div class="ex-lbl">LEFT JOIN — all left rows, NULLs for unmatched right</div>
+<pre><span class="kw">FROM</span> users u <span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="cmt">-- anti-join: add WHERE o.id IS NULL → never ordered</span></pre></div>
+    <div class="ex"><div class="ex-lbl">CROSS JOIN — every combination (cartesian)</div>
+<pre><span class="kw">FROM</span> dates d <span class="kw">CROSS JOIN</span> products p
+<span class="cmt">-- build a spine → LEFT JOIN actuals to fill gaps</span></pre></div>
+    <div class="ex"><div class="ex-lbl">SELF JOIN — table joined to itself</div>
+<pre><span class="kw">FROM</span> employees e1
+<span class="kw">JOIN</span>  employees e2 <span class="kw">ON</span> e1.manager_id = e2.id
+<span class="cmt">-- e1 = employee row, e2 = their manager</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="cte with recursive subquery reuse modular hierarchy">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">CTEs (WITH) — including recursive</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="dg">
+    <div class="da"><div class="dt">Standard CTE</div>
+<pre><span class="kw">WITH</span> active <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+  <span class="kw">WHERE</span> active = <span class="str">true</span>
+),
+orders_cnt <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) n
+  <span class="kw">FROM</span> orders <span class="kw">GROUP BY</span> <span class="num">1</span>
+)
+<span class="kw">SELECT</span> a.*, o.n
+<span class="kw">FROM</span> active a
+<span class="kw">LEFT JOIN</span> orders_cnt o
+  <span class="kw">ON</span> a.id = o.user_id</pre></div>
+    <div class="db"><div class="dt">Recursive CTE — org tree</div>
+<pre><span class="kw">WITH RECURSIVE</span> org <span class="kw">AS</span> (
+  <span class="cmt">-- base: root nodes</span>
+  <span class="kw">SELECT</span> id, name,
+    manager_id, <span class="num">1</span> <span class="kw">AS</span> lvl
+  <span class="kw">FROM</span> employees
+  <span class="kw">WHERE</span> manager_id <span class="kw">IS NULL</span>
+  <span class="kw">UNION ALL</span>
+  <span class="cmt">-- recursive: reports</span>
+  <span class="kw">SELECT</span> e.id, e.name,
+    e.manager_id, o.lvl+<span class="num">1</span>
+  <span class="kw">FROM</span> employees e
+  <span class="kw">JOIN</span> org o
+    <span class="kw">ON</span> e.manager_id = o.id
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> org
+<span class="kw">ORDER BY</span> lvl</pre></div>
+  </div>
+  <div class="note"><b>When to recurse:</b> org charts, category trees, graph traversal. The base case (WHERE manager IS NULL) anchors the loop.</div>
+</div>
+</div>
+
+<div class="card" data-kw="case when pivot conditional aggregation else null sum count">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">CASE WHEN — pivot & conditional aggregation</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Input: inspections</div>
+<pre><span class="out">type       score
+Routine    3
+Complaint  7
+Routine    8
+Complaint  2</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Pivot query</div>
+<pre><span class="kw">SELECT</span>
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span>
+    type=<span class="str">'Routine'</span>
+    <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span>
+  <span class="kw">END</span>) routine_cnt,
+  <span class="fn">AVG</span>(<span class="kw">CASE WHEN</span>
+    type=<span class="str">'Routine'</span>
+    <span class="kw">THEN</span> score
+  <span class="kw">END</span>) routine_avg
+<span class="kw">FROM</span> inspections</pre></div>
+    <div class="ex" style="grid-column:span 2"><div class="ex-lbl">Output + the ELSE trap</div>
+<pre><span class="out">routine_cnt  routine_avg
+2            5.5</span>
+<span class="cmt">-- ELSE 0   → SUM/COUNT counts all rows
+-- ELSE NULL → AVG ignores nulls (omit ELSE for AVG!)</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="union intersect except minus dedup combine set">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">UNION / UNION ALL / INTERSECT / EXCEPT</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="dg">
+    <div class="da"><div class="dt">UNION ALL — combine, keep dupes (fast)</div>
+<pre><span class="kw">SELECT</span> id <span class="kw">FROM</span> table_a
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> id <span class="kw">FROM</span> table_b
+<span class="cmt">-- default choice — no extra DISTINCT pass</span></pre></div>
+    <div class="db"><div class="dt">UNION — combine, deduplicate (slow)</div>
+<pre><span class="kw">SELECT</span> id <span class="kw">FROM</span> table_a
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> id <span class="kw">FROM</span> table_b
+<span class="cmt">-- runs DISTINCT internally — avoid if avoidable</span></pre></div>
+  </div>
+  <div class="g2" style="margin-top:8px;">
+    <div class="ex"><div class="ex-lbl">INTERSECT — in both tables</div>
+<pre><span class="kw">SELECT</span> id <span class="kw">FROM</span> jan_active
+<span class="kw">INTERSECT</span>
+<span class="kw">SELECT</span> id <span class="kw">FROM</span> feb_active
+<span class="cmt">-- retained both months</span></pre></div>
+    <div class="ex"><div class="ex-lbl">EXCEPT — in A but not B (churn)</div>
+<pre><span class="kw">SELECT</span> id <span class="kw">FROM</span> jan_active
+<span class="kw">EXCEPT</span>
+<span class="kw">SELECT</span> id <span class="kw">FROM</span> feb_active
+<span class="cmt">-- churned after Jan (MINUS in Oracle)</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="coalesce nullif safe division null zero">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">COALESCE vs NULLIF — safe division pattern</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g1">
+    <div class="ex"><div class="ex-lbl">COALESCE — first non-null value</div>
+<pre><span class="fn">COALESCE</span>(col_a, col_b, <span class="num">0</span>)
+<span class="cmt">-- returns col_a if not null, else col_b, else 0
+-- use: fill nulls after LEFT JOIN</span></pre></div>
+    <div class="ex"><div class="ex-lbl">NULLIF — returns null when two values equal</div>
+<pre><span class="fn">NULLIF</span>(denominator, <span class="num">0</span>)
+<span class="cmt">-- returns NULL if denominator = 0 → prevents /0 error</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Combined — the safe division pattern (memorise this)</div>
+<pre><span class="kw">SELECT</span>
+  <span class="fn">COALESCE</span>(
+    <span class="fn">SUM</span>(revenue) * <span class="num">1.0</span>
+    / <span class="fn">NULLIF</span>(<span class="fn">COUNT</span>(*), <span class="num">0</span>),
+  <span class="num">0</span>) <span class="kw">AS</span> avg_revenue
+<span class="cmt">-- if COUNT = 0 → NULL → COALESCE gives 0</span></pre></div>
+  </div>
+</div>
+</div>
+
+</div></div><!-- /core -->
+
+<!-- ═══════════════════════════ WINDOW FNS ═══════════════════════════ -->
+<div class="sec" id="sec-window">
+<div class="cards">
+
+<div class="card" data-kw="row_number rank dense_rank tie ranking dedup top-n">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">ROW_NUMBER vs RANK vs DENSE_RANK</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g1">
+    <div class="ex"><div class="ex-lbl">All three on tied scores</div>
+<pre><span class="kw">SELECT</span> name, score,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> score <span class="kw">DESC</span>) rn,
+  <span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> score <span class="kw">DESC</span>) rk,
+  <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> score <span class="kw">DESC</span>) dr
+<span class="kw">FROM</span> scores</pre></div>
+    <div class="ex"><div class="ex-lbl">Output — watch the tie on row 2</div>
+<pre><span class="out">name   score  rn   rk   dr
+Alice  90     1    1    1
+Bob    90     2    1    1    ← same score as Alice
+Carol  80     3    3    2    ← RANK skips 2, DENSE_RANK doesn't
+Dan    70     4    4    3</span>
+<span class="cmt">-- ROW_NUMBER → always unique, arbitrary tiebreak
+-- RANK       → gaps after ties (1,1,3,4...)
+-- DENSE_RANK → no gaps after ties (1,1,2,3...)</span></pre></div>
+  </div>
+  <div class="note"><b>Interview pattern:</b> "latest record per user" → ROW_NUMBER + PARTITION BY. "Top N allowing all ties" → DENSE_RANK.</div>
+</div>
+</div>
+
+<div class="card" data-kw="lag lead offset previous next day-over-day session">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">LAG / LEAD — row offset patterns</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-adv">advanced</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Syntax</div>
+<pre><span class="fn">LAG</span>(col, offset, default)
+  <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> grp <span class="kw">ORDER BY</span> dt)
+<span class="cmt">-- offset: rows back (default 1)
+-- default: value when no prior row</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Day-over-day diff</div>
+<pre><span class="kw">SELECT</span> dt, revenue,
+  <span class="fn">LAG</span>(revenue,<span class="num">1</span>,<span class="num">0</span>)
+    <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> dt) prev,
+  revenue - <span class="fn">LAG</span>(revenue,<span class="num">1</span>,<span class="num">0</span>)
+    <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> dt) diff
+<span class="kw">FROM</span> daily_sales</pre></div>
+    <div class="ex"><div class="ex-lbl">Output</div>
+<pre><span class="out">dt        rev  prev  diff
+Jan 1     100  0     100
+Jan 2     120  100   20
+Jan 3     90   120   -30</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Session detection with LEAD</div>
+<pre><span class="kw">CASE WHEN</span>
+  <span class="fn">LEAD</span>(ts) <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> user_id
+    <span class="kw">ORDER BY</span> ts) - ts
+  > <span class="kw">INTERVAL</span> <span class="str">'30 min'</span>
+<span class="kw">THEN</span> <span class="str">'new_session'</span>
+<span class="kw">ELSE</span> <span class="str">'same'</span> <span class="kw">END</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="partition by group by window over collapse keep rows">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">PARTITION BY vs GROUP BY</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="dg">
+    <div class="da"><div class="dt">GROUP BY — rows collapse to 1 per group</div>
+<pre><span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(salary)
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept
+<span class="cmt">-- returns 1 row per dept</span></pre></div>
+    <div class="db"><div class="dt">PARTITION BY — rows stay, aggregate attached</div>
+<pre><span class="kw">SELECT</span> name, dept, salary,
+  <span class="fn">AVG</span>(salary) <span class="kw">OVER</span>
+    (<span class="kw">PARTITION BY</span> dept) dept_avg
+<span class="kw">FROM</span> employees
+<span class="cmt">-- 1 row per employee + their dept avg</span></pre></div>
+  </div>
+  <div class="note"><b>Use PARTITION BY</b> when you need "each row alongside its group's aggregate" — e.g. employee's salary as % of dept total.</div>
+</div>
+</div>
+
+<div class="card" data-kw="first_value last_value frame unbounded default gotcha">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">FIRST_VALUE / LAST_VALUE — the frame trap</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">FIRST_VALUE — works fine by default</div>
+<pre><span class="fn">FIRST_VALUE</span>(order_date) <span class="kw">OVER</span> (
+  <span class="kw">PARTITION BY</span> user_id
+  <span class="kw">ORDER BY</span> order_date
+)</pre></div>
+    <div class="ex"><div class="ex-lbl">LAST_VALUE — broken by default!</div>
+<pre><span class="cmt">-- Default frame stops at CURRENT ROW
+-- so LAST_VALUE = current row, always
+-- Fix — always add explicit frame:</span>
+<span class="fn">LAST_VALUE</span>(col) <span class="kw">OVER</span> (
+  <span class="kw">PARTITION BY</span> user_id
+  <span class="kw">ORDER BY</span> order_date
+  <span class="kw">ROWS BETWEEN</span>
+    <span class="kw">UNBOUNDED PRECEDING</span>
+    <span class="kw">AND UNBOUNDED FOLLOWING</span>
+)</pre></div>
+  </div>
+  <div class="note"><b>LAST_VALUE is the #1 window function interview trap.</b> Without the full frame clause, it always returns the current row's value — not the last in the partition.</div>
+</div>
+</div>
+
+</div></div><!-- /window -->
+
+<!-- ═══════════════════════════ SLIDING WINDOWS ═══════════════════════════ -->
+<div class="sec" id="sec-sliding">
+<div class="cards">
+
+<div class="card" data-kw="rows range between preceding following physical logical interval sparse gaps">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">ROWS vs RANGE — the most confused pair</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="dg">
+    <div class="da"><div class="dt">ROWS — physical row count</div>
+<pre><span class="fn">SUM</span>(val) <span class="kw">OVER</span> (
+  <span class="kw">ORDER BY</span> date
+  <span class="kw">ROWS BETWEEN</span> <span class="num">2</span> <span class="kw">PRECEDING</span>
+           <span class="kw">AND CURRENT ROW</span>
+)
+<span class="cmt">-- always exactly 3 rows
+-- ignores date gaps
+-- use: evenly spaced data</span></pre></div>
+    <div class="db"><div class="dt">RANGE — logical value range</div>
+<pre><span class="fn">SUM</span>(val) <span class="kw">OVER</span> (
+  <span class="kw">ORDER BY</span> date
+  <span class="kw">RANGE BETWEEN</span>
+    <span class="kw">INTERVAL</span> <span class="str">'2 days'</span> <span class="kw">PRECEDING</span>
+    <span class="kw">AND CURRENT ROW</span>
+)
+<span class="cmt">-- all rows within date range
+-- handles gaps correctly
+-- use: sparse / real time data</span></pre></div>
+  </div>
+  <div class="ex" style="margin-top:10px"><div class="ex-lbl">Concrete difference — sparse dates</div>
+<pre><span class="out">date   val   ROWS(2 prec)   RANGE(2 days)
+Jan 1  10    10             10
+Jan 2  20    30             30
+Jan 5  30    60             30   ← Jan3,4 missing — RANGE sees only Jan5
+Jan 6  40    90             70   ← RANGE sees Jan5+Jan6 only</span></pre></div>
+  <div class="note"><b>Financial data</b> with weekends/holidays → RANGE. <b>Click-stream or sequential IDs</b> → ROWS.</div>
+</div>
+</div>
+
+<div class="card" data-kw="rolling sum average count 7 day 30 window sliding formula">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Rolling SUM / AVG / COUNT — formula to remember</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-adv">advanced</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">7-day rolling revenue (N=7 → 6 PRECEDING)</div>
+<pre><span class="kw">SELECT</span> dt, revenue,
+  <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> dt
+    <span class="kw">ROWS BETWEEN</span> <span class="num">6</span> <span class="kw">PRECEDING</span>
+             <span class="kw">AND CURRENT ROW</span>
+  ) rolling_7d,
+  <span class="fn">AVG</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> dt
+    <span class="kw">ROWS BETWEEN</span> <span class="num">6</span> <span class="kw">PRECEDING</span>
+             <span class="kw">AND CURRENT ROW</span>
+  ) avg_7d
+<span class="kw">FROM</span> daily_revenue</pre></div>
+    <div class="ex"><div class="ex-lbl">Output (rolling window builds up)</div>
+<pre><span class="out">dt     rev  rolling_7d
+Jan1   100  100
+Jan2   200  300
+Jan3   150  450
+Jan4   180  630
+Jan5   120  750
+Jan6   200  950
+Jan7   90   1040
+Jan8   110  1050 ← Jan1 drops off</span>
+<span class="cmt">-- Formula: N-day = (N-1) PRECEDING</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="conditional window filtered rolling sum case inside event type">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Conditional aggregation inside a window</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-adv">advanced</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">Filter which rows contribute to a rolling aggregate without filtering the result set — CASE returns NULL, SUM ignores NULLs.</p>
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Rolling order revenue only (not visits)</div>
+<pre><span class="kw">SELECT</span> dt, event_type, amount,
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span>
+    event_type = <span class="str">'order'</span>
+    <span class="kw">THEN</span> amount
+  <span class="kw">END</span>) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> dt
+    <span class="kw">ROWS BETWEEN</span> <span class="num">2</span> <span class="kw">PRECEDING</span>
+             <span class="kw">AND CURRENT ROW</span>
+  ) rolling_orders
+<span class="kw">FROM</span> events</pre></div>
+    <div class="ex"><div class="ex-lbl">Output</div>
+<pre><span class="out">dt  type     amt  rolling_orders
+1   order    10   10
+2   visit    5    10   ← visit = NULL
+3   order    20   30
+4   visit    8    30   ← still 30
+5   order    15   35   ← 20+15</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="preceding following centered past future both sides direction smoothing">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Window directions — past / future / centered</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-adv">advanced</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Three frame directions</div>
+<pre><span class="kw">ROWS BETWEEN</span> <span class="num">1</span> <span class="kw">PRECEDING</span>
+         <span class="kw">AND CURRENT ROW</span>
+<span class="cmt">-- backward → trailing history</span>
+
+<span class="kw">ROWS BETWEEN CURRENT ROW</span>
+         <span class="kw">AND</span> <span class="num">1</span> <span class="kw">FOLLOWING</span>
+<span class="cmt">-- forward → look-ahead</span>
+
+<span class="kw">ROWS BETWEEN</span> <span class="num">1</span> <span class="kw">PRECEDING</span>
+         <span class="kw">AND</span> <span class="num">1</span> <span class="kw">FOLLOWING</span>
+<span class="cmt">-- centered → noise smoothing</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Input 10,20,30,40 → SUM outputs</div>
+<pre><span class="out">val  past    future  centered
+10   10      30      30
+20   30      50      60
+30   50      70      90
+40   70      40      70</span></pre></div>
+  </div>
+</div>
+</div>
+
+</div></div><!-- /sliding -->
+
+<!-- ═══════════════════════════ CONFUSED PAIRS ═══════════════════════════ -->
+<div class="sec" id="sec-confused">
+<div class="cards">
+
+<div class="card" data-kw="ntile percentile percentile_cont percentile_disc bucket threshold quartile">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">NTILE vs PERCENTILE_CONT vs PERCENTILE_DISC</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g1">
+    <div class="ex"><div class="ex-lbl">NTILE — tag each row with a bucket label</div>
+<pre><span class="fn">NTILE</span>(<span class="num">4</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> spend) <span class="kw">AS</span> quartile
+<span class="cmt">-- Q1 = bottom 25%, Q4 = top 25%
+-- returns a LABEL per row, not a value
+-- use: "find bottom 20% of users"</span></pre></div>
+    <div class="ex"><div class="ex-lbl">PERCENTILE_CONT — interpolated threshold value</div>
+<pre><span class="fn">PERCENTILE_CONT</span>(<span class="num">0.9</span>)
+  <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> spend) <span class="kw">AS</span> p90
+<span class="cmt">-- returns a VALUE e.g. 482.5 (may not exist in data)
+-- use: "what spend is the p90 cutoff?"</span></pre></div>
+    <div class="ex"><div class="ex-lbl">PERCENTILE_DISC — nearest actual data point</div>
+<pre><span class="fn">PERCENTILE_DISC</span>(<span class="num">0.5</span>)
+  <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> spend) <span class="kw">AS</span> median
+<span class="cmt">-- always returns existing row value (no interpolation)
+-- CONT → 42.5;  DISC → 42 or 43</span></pre></div>
+  </div>
+  <div class="note"><b>Mental model:</b> NTILE → "label each row". PERCENTILE → "give me the threshold value". They answer different questions.</div>
+</div>
+</div>
+
+<div class="card" data-kw="exists in subquery null not in correlated performance">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">EXISTS vs IN — the NULL trap</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="dg">
+    <div class="da"><div class="dt">IN — evaluates full subquery first</div>
+<pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> user_id <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> id <span class="kw">FROM</span> users
+  <span class="kw">WHERE</span> country = <span class="str">'US'</span>
+)
+<span class="cmt">-- ⚠ NOT IN with a NULL in list
+-- returns ZERO rows — silent bug!</span></pre></div>
+    <div class="db"><div class="dt">EXISTS — short-circuits, NULL-safe</div>
+<pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> orders o
+<span class="kw">WHERE EXISTS</span> (
+  <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> users u
+  <span class="kw">WHERE</span> u.id = o.user_id
+    <span class="kw">AND</span> u.country = <span class="str">'US'</span>
+)
+<span class="cmt">-- stops at first match
+-- handles NULLs correctly</span></pre></div>
+  </div>
+  <div class="note"><b>Critical:</b> NOT IN with a NULL anywhere in the subquery returns ZERO rows. Always prefer NOT EXISTS when NULLs might exist — this is a frequent interview bug question.</div>
+</div>
+</div>
+
+<div class="card" data-kw="string_agg array_agg collect list group concat listagg dialect">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">STRING_AGG / ARRAY_AGG — dialect map</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-adv">advanced</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Collect products per order</div>
+<pre><span class="kw">SELECT</span> order_id,
+  <span class="fn">STRING_AGG</span>(product, <span class="str">', '</span>
+    <span class="kw">ORDER BY</span> product) products,
+  <span class="fn">ARRAY_AGG</span>(product_id
+    <span class="kw">ORDER BY</span> product) id_list
+<span class="kw">FROM</span> order_items
+<span class="kw">GROUP BY</span> order_id</pre></div>
+    <div class="ex"><div class="ex-lbl">Output + dialect map</div>
+<pre><span class="out">id  products           id_list
+101 Eggs, Milk, Yogurt [3,7,12]</span>
+<span class="cmt">-- PostgreSQL: STRING_AGG(col, ',')
+-- BigQuery:   STRING_AGG(col, ',')
+-- MySQL:      GROUP_CONCAT(col)
+-- Snowflake:  LISTAGG(col, ',')
+-- Spark SQL:  COLLECT_LIST(col)</span></pre></div>
+  </div>
+</div>
+</div>
+
+</div></div><!-- /confused -->
+
+<!-- ═══════════════════════════ ADVANCED DE ═══════════════════════════ -->
+<div class="sec" id="sec-advanced">
+<div class="cards">
+
+<div class="card" data-kw="qualify filter window inline snowflake bigquery duckdb latest per group">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">QUALIFY — filter window results inline</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-de">DE-specific</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">QUALIFY is to window functions what HAVING is to GROUP BY — filters after window computation, no subquery needed.</p>
+  <div class="dg">
+    <div class="da"><div class="dt">Without QUALIFY (verbose subquery wrap)</div>
+<pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> *,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> user_id
+      <span class="kw">ORDER BY</span> order_date <span class="kw">DESC</span>
+    ) rn
+  <span class="kw">FROM</span> orders
+) <span class="kw">WHERE</span> rn = <span class="num">1</span></pre></div>
+    <div class="db"><div class="dt">With QUALIFY (clean, one level)</div>
+<pre><span class="kw">SELECT</span> *
+<span class="kw">FROM</span> orders
+<span class="kw">QUALIFY</span>
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> user_id
+    <span class="kw">ORDER BY</span> order_date <span class="kw">DESC</span>
+  ) = <span class="num">1</span>
+<span class="cmt">-- latest order per user</span></pre></div>
+  </div>
+  <div class="note"><b>Available in:</b> Snowflake, BigQuery, DuckDB. Not standard PostgreSQL/MySQL. The cleanest answer for "get latest record per group".</div>
+</div>
+</div>
+
+<div class="card" data-kw="lateral join cross apply unnest explode array row-by-row correlated from">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">LATERAL JOIN — row-by-row subquery</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-de">DE-specific</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">LATERAL lets a subquery reference columns from the outer FROM clause — like a correlated subquery but in the table position. Called CROSS APPLY in SQL Server.</p>
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Top 3 orders per user (no window fn needed)</div>
+<pre><span class="kw">SELECT</span> u.id, u.name, t.*
+<span class="kw">FROM</span> users u,
+<span class="kw">LATERAL</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> orders o
+  <span class="kw">WHERE</span> o.user_id = u.id
+  <span class="kw">ORDER BY</span> amount <span class="kw">DESC</span>
+  <span class="kw">LIMIT</span> <span class="num">3</span>
+) t
+<span class="cmt">-- references u.id inside subquery</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Explode array column into rows</div>
+<pre><span class="kw">SELECT</span> u.id, tag
+<span class="kw">FROM</span> users u,
+<span class="kw">LATERAL UNNEST</span>(u.tags) <span class="kw">AS</span> tag
+<span class="cmt">-- one row per tag
+-- equivalent to EXPLODE() in Spark SQL</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="generate series spine calendar gap fill date missing continuous">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Date spine / GENERATE_SERIES — fill gaps</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-de">DE-specific</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">Generate a continuous date range, then LEFT JOIN your data onto it. Standard pattern for ensuring every date appears in time-series reports.</p>
+  <div class="dg">
+    <div class="da"><div class="dt">PostgreSQL</div>
+<pre><span class="kw">WITH</span> spine <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> <span class="fn">generate_series</span>(
+    <span class="str">'2024-01-01'</span>::date,
+    <span class="str">'2024-01-31'</span>::date,
+    <span class="str">'1 day'</span>::interval
+  )::date <span class="kw">AS</span> dt
+)
+<span class="kw">SELECT</span> s.dt,
+  <span class="fn">COALESCE</span>(d.revenue, <span class="num">0</span>) rev
+<span class="kw">FROM</span> spine s
+<span class="kw">LEFT JOIN</span> daily_revenue d
+  <span class="kw">ON</span> s.dt = d.dt</pre></div>
+    <div class="db"><div class="dt">BigQuery</div>
+<pre><span class="kw">WITH</span> spine <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> dt <span class="kw">FROM UNNEST</span>(
+    <span class="fn">GENERATE_DATE_ARRAY</span>(
+      <span class="str">'2024-01-01'</span>,
+      <span class="str">'2024-01-31'</span>,
+      <span class="kw">INTERVAL</span> <span class="num">1</span> <span class="kw">DAY</span>
+    )
+  ) <span class="kw">AS</span> dt
+)
+<span class="kw">SELECT</span> s.dt,
+  <span class="fn">COALESCE</span>(d.revenue, <span class="num">0</span>) rev
+<span class="kw">FROM</span> spine s
+<span class="kw">LEFT JOIN</span> data d
+  <span class="kw">ON</span> s.dt = d.dt</pre></div>
+  </div>
+  <div class="note">Always COALESCE to 0 after the LEFT JOIN — missing days return NULL otherwise and silently break aggregates downstream.</div>
+</div>
+</div>
+
+<div class="card" data-kw="window function filter qualify having where order execution">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">SQL execution order — what runs when</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-de">DE-specific</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <p class="desc">Understanding execution order explains why you can't use aliases in WHERE, why window fns must go in SELECT or HAVING, and why QUALIFY exists.</p>
+  <div class="ex"><div class="ex-lbl">Order of operations (1 = first)</div>
+<pre><span class="num">1</span>. <span class="kw">FROM</span> / <span class="kw">JOIN</span>          <span class="cmt">-- source tables</span>
+<span class="num">2</span>. <span class="kw">WHERE</span>                <span class="cmt">-- row filter (no aggregates yet)</span>
+<span class="num">3</span>. <span class="kw">GROUP BY</span>             <span class="cmt">-- group rows</span>
+<span class="num">4</span>. <span class="kw">HAVING</span>               <span class="cmt">-- filter groups</span>
+<span class="num">5</span>. <span class="kw">SELECT</span>               <span class="cmt">-- compute columns + window fns</span>
+<span class="num">6</span>. <span class="kw">QUALIFY</span>              <span class="cmt">-- filter window fn results</span>
+<span class="num">7</span>. <span class="kw">DISTINCT</span>             <span class="cmt">-- dedup</span>
+<span class="num">8</span>. <span class="kw">ORDER BY</span>             <span class="cmt">-- sort (aliases usable here)</span>
+<span class="num">9</span>. <span class="kw">LIMIT</span> / <span class="kw">OFFSET</span>      <span class="cmt">-- paginate</span></pre></div>
+  <div class="note"><b>Common mistake:</b> Using a SELECT alias in WHERE — fails because WHERE runs before SELECT. You must repeat the expression or wrap in a CTE/subquery.</div>
+</div>
+</div>
+
+</div></div><!-- /advanced -->
+
+<!-- ═══════════════════════════ DATES & TIMES ═══════════════════════════ -->
+<div class="sec" id="sec-dates">
+<div class="cards">
+
+<div class="card" data-kw="date_trunc truncate bucket week month year hour time series sort">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">DATE_TRUNC — time bucketing</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Truncation levels</div>
+<pre><span class="fn">DATE_TRUNC</span>(<span class="str">'week'</span>,  ts) <span class="cmt">→ Monday of week</span>
+<span class="fn">DATE_TRUNC</span>(<span class="str">'month'</span>, ts) <span class="cmt">→ 1st of month</span>
+<span class="fn">DATE_TRUNC</span>(<span class="str">'year'</span>,  ts) <span class="cmt">→ Jan 1 of year</span>
+<span class="fn">DATE_TRUNC</span>(<span class="str">'hour'</span>,  ts) <span class="cmt">→ start of hour</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Weekly cohort grouping</div>
+<pre><span class="kw">SELECT</span>
+  <span class="fn">DATE_TRUNC</span>(<span class="str">'week'</span>, created_at) cohort,
+  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> user_id) new_users
+<span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span></pre></div>
+  </div>
+  <div class="note"><b>DATE_TRUNC vs TO_CHAR:</b> Use DATE_TRUNC for grouping — it preserves sortability and enables date arithmetic. TO_CHAR only for display.</div>
+</div>
+</div>
+
+<div class="card" data-kw="datediff interval age arithmetic between dialect bigquery snowflake postgres">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Date arithmetic — dialect differences</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-trap">⚠ trap</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g1">
+    <div class="ex"><div class="ex-lbl">PostgreSQL</div>
+<pre>date1 - date2                      <span class="cmt">-- integer days</span>
+<span class="fn">EXTRACT</span>(<span class="kw">DAY FROM</span> ts1 - ts2)        <span class="cmt">-- float days</span>
+created_at + <span class="kw">INTERVAL</span> <span class="str">'7 days'</span>    <span class="cmt">-- add time</span>
+<span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'1 month'</span></pre></div>
+    <div class="ex"><div class="ex-lbl">BigQuery / Snowflake</div>
+<pre><span class="cmt">-- BigQuery:</span>
+<span class="fn">DATE_DIFF</span>(date1, date2, <span class="kw">DAY</span>)
+<span class="fn">DATE_ADD</span>(dt, <span class="kw">INTERVAL</span> <span class="num">7</span> <span class="kw">DAY</span>)
+
+<span class="cmt">-- Snowflake:</span>
+<span class="fn">DATEDIFF</span>(<span class="str">'day'</span>, date1, date2)
+<span class="fn">DATEADD</span>(<span class="str">'day'</span>, <span class="num">7</span>, dt)</pre></div>
+    <div class="ex"><div class="ex-lbl">Epoch — universal seconds between events</div>
+<pre><span class="fn">EXTRACT</span>(<span class="kw">EPOCH FROM</span> event_b)
+  - <span class="fn">EXTRACT</span>(<span class="kw">EPOCH FROM</span> event_a)
+<span class="cmt">-- seconds since 1970-01-01, works cross-DB</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="to_char format yyyy mm dd mon hh24 display reporting">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">TO_CHAR — date formatting reference</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-core">core</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">Tokens (input: 2020-05-01 14:35:20)</div>
+<pre><span class="out">YYYY → 2020    YY   → 20
+MM   → 05      Mon  → May
+MONTH→ MAY     DD   → 01
+Day  → Friday  HH24 → 14
+HH12 → 02      MI   → 35
+SS   → 20</span></pre></div>
+    <div class="ex"><div class="ex-lbl">Common format strings</div>
+<pre><span class="fn">TO_CHAR</span>(ts, <span class="str">'YYYY-MM-DD'</span>)  <span class="out">→ 2020-05-01</span>
+<span class="fn">TO_CHAR</span>(ts, <span class="str">'Mon YYYY'</span>)    <span class="out">→ May 2020</span>
+<span class="fn">TO_CHAR</span>(ts, <span class="str">'DD Mon YYYY'</span>) <span class="out">→ 01 May 2020</span>
+<span class="fn">TO_CHAR</span>(ts, <span class="str">'HH24:MI:SS'</span>)  <span class="out">→ 14:35:20</span></pre></div>
+  </div>
+</div>
+</div>
+
+<div class="card" data-kw="timezone utc local convert at time zone pst est bug midnight">
+<div class="card-hd" onclick="tog(this)">
+  <div class="card-left"><span class="card-title">Timezone handling — the UTC midnight bug</span></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="tag t-de">DE-specific</span><span class="chev">▶</span></div>
+</div>
+<div class="card-bd">
+  <div class="g2">
+    <div class="ex"><div class="ex-lbl">PostgreSQL</div>
+<pre>ts <span class="kw">AT TIME ZONE</span> <span class="str">'UTC'</span>
+   <span class="kw">AT TIME ZONE</span> <span class="str">'America/Los_Angeles'</span>
+
+<span class="cmt">-- Or:</span>
+<span class="fn">TIMEZONE</span>(<span class="str">'America/New_York'</span>, ts)</pre></div>
+    <div class="ex"><div class="ex-lbl">BigQuery — group by LOCAL date</div>
+<pre><span class="fn">DATE</span>(ts, <span class="str">'America/Los_Angeles'</span>) local_dt
+<span class="cmt">-- ⚠ grouping by UTC date in US product
+-- midnight cutoff = 4pm–8pm local time
+-- extremely common DE pipeline bug!</span></pre></div>
+  </div>
+  <div class="note"><b>Rule:</b> Store all timestamps as UTC. Convert to local time only at query/display time. Always specify timezone when grouping by date for user-facing products.</div>
+</div>
+</div>
+
+</div></div><!-- /dates -->
+
+</div><!-- /content -->
+
+<footer>
+  Built for Data Engineer interview prep &nbsp;·&nbsp;
+  PostgreSQL · BigQuery · Snowflake &nbsp;·&nbsp;
+  <a href="https://github.com" target="_blank">github.com</a>
+</footer>
+
+<script>
+const COUNTS = {
+  core: 6, window: 4, sliding: 4, confused: 3, advanced: 4, dates: 4
+};
+
+function tog(hd) {
+  const bd = hd.nextElementSibling;
+  const ch = hd.querySelector('.chev');
+  const open = bd.classList.contains('open');
+  bd.classList.toggle('open', !open);
+  ch.classList.toggle('open', !open);
+}
+
+const tabs = document.querySelectorAll('.tb');
+const secBar = document.getElementById('sec-bar');
+const secMeta = document.getElementById('sec-meta');
+const searchView = document.getElementById('search-view');
+
+tabs.forEach(t => {
+  t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+    t.classList.add('active');
+    document.getElementById('sec-' + t.dataset.s).classList.add('on');
+    searchView.classList.remove('on');
+    secBar.style.display = '';
+    document.getElementById('gsearch').value = '';
+    const n = COUNTS[t.dataset.s] || 0;
+    secMeta.textContent = n + ' concept' + (n !== 1 ? 's' : '');
+  });
+});
+
+const gsearch = document.getElementById('gsearch');
+const srCount = document.getElementById('sr-count');
+const srCards = document.getElementById('sr-cards');
+
+gsearch.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  if (!q) {
+    searchView.classList.remove('on');
+    secBar.style.display = '';
+    const active = document.querySelector('.tb.active');
+    if (active) document.getElementById('sec-' + active.dataset.s).classList.add('on');
+    return;
+  }
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+  secBar.style.display = 'none';
+  searchView.classList.add('on');
+  srCards.innerHTML = '';
+  let count = 0;
+  document.querySelectorAll('.card').forEach(card => {
+    const text = (card.dataset.kw || '') + ' ' + card.querySelector('.card-title').textContent;
+    if (text.toLowerCase().includes(q)) {
+      const clone = card.cloneNode(true);
+      clone.querySelector('.card-hd').setAttribute('onclick', 'tog(this)');
+      srCards.appendChild(clone);
+      count++;
+    }
+  });
+  srCount.textContent = count + ' result' + (count !== 1 ? 's' : '') + ' for "' + this.value + '"';
+});
+</script>
 </body>
 </html>
